@@ -6,112 +6,122 @@
         <link rel="icon" type="image/svg" href="https://upload.wikimedia.org/wikipedia/commons/4/41/Underground.svg">
 
         <title>London Underground Crowding information</title>
-        
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js">
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js">
         </script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js">
         </script>
         <script>
-            let dataChart=null;
-            let globalData=null;
+            let dataChart = null;
+
+            const xhr = new XMLHttpRequest();
 
 
-            function getData(){
+            function getData() {
                 //Construct the query url
                 var url = "https://api.tfl.gov.uk/crowding/" +
-                document.getElementById('station').value +'/' +
-                document.getElementById('day').value;
+                    document.getElementById('station').value + '/' +
+                    document.getElementById('day').value;
                 //Get the data from the url, supplying the api key
-                $.getJSON(url, {app_key: "5d02c52c289048d79d405e41f0579ba8"}, function(data){
-                    //Draw the new chart
-                    var crowdingData = data.timeBands;
-                    globalData = data;
-                    if(dataChart ==null){
-                        dataChart = new Chart(document.getElementById('chart'),
-                        {type: 'bar',
-                            data: {
-                                labels: crowdingData.map(row => row.timeBand),
-                                datasets: [
-                                    {
-                                    label: 'Crowding',
-                                    data: crowdingData.map(row => row.percentageOfBaseLine*100)
-                                    }
+                xhr.open('GET', url);
+                xhr.setRequestHeader('app_key', "5d02c52c289048d79d405e41f0579ba8");
+                xhr.send();
+            }
 
-                                ]  
-                                             
-                            },
-                            options: {
-                                scales:{
-                                    y: {
-                                        max : 100
-                                    }
+            xhr.addEventListener('loadend', displayData);
+
+
+
+
+
+            function displayData(e) {
+                data = JSON.parse(xhr.responseText)
+                if (dataChart == null) {
+                    drawChart(data);
+                }
+                else {
+                    updateChart(data);
+                }
+                setPeakText(data);
+                setTimebandTable(data);
+            }
+
+
+
+            function updateChart(data) {
+                dataChart.destroy();
+                drawChart(data);
+            }
+
+            function drawChart(data) {
+                chartData = data.timeBands
+
+                dataChart = new Chart(document.getElementById('chart'),
+                    {
+                        type: 'bar',
+                        data: {
+                            labels: chartData.map(row => row.timeBand),
+                            datasets: [
+                                {
+                                    label: 'Crowding',
+                                    data: chartData.map(row => row.percentageOfBaseLine * 100)
+                                }
+
+                            ]
+
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    max: 100
                                 }
                             }
                         }
-                    )
-                     setPeakText();
                     }
-                    
-                    else{
-                        dataChart.destroy();
-                        dataChart = new Chart(document.getElementById('chart'),
-                        {type: 'bar',
-                            data: {
-                                labels: crowdingData.map(row => row.timeBand),
-                                datasets: [
-                                    {
-                                    label: 'Crowding',
-                                    data: crowdingData.map(row => row.percentageOfBaseLine*100)
-                                    }
-
-                                ]                   
-                            },
-                            options: {
-                                scales:{
-                                    y: {
-                                        max : 100
-                                    }
-                                }
-                            }
-                        })
-
-     
-                    }
-                    
-                 })
-                 setPeakText();
+                )
             }
 
-            function setPeakText(){
+            function setPeakText(data) {
                 am_peak = document.getElementById("am_peak");
-                am_peak.textContent = "AM peak timeband: " + globalData.amPeakTimeBand;
+                am_peak.textContent = "AM peak timeband: " + data.amPeakTimeBand;
 
-                am_peak = document.getElementById("pm_peak");
-                pm_peak.textContent = "AM peak timeband: " + globalData.pmPeakTimeBand
+                am_peak = document.getElementById("pm_peak"); chart
+                pm_peak.textContent = "PM peak timeband: " + data.pmPeakTimeBand
+            }
+
+            function setTimebandTable(data) {
+                tableData = data.timeBands;
+                table=document.getElementById('timeBand_table')
+                for (key in tableData) {
+                    if (tableData.hasOwnProperty(key)) {
+                        var row = document.createElement('tr');
+                        row.appendChild(document.createElement('td'));
+                        row.appendChild(document.createTextNode(`${tableData[key].timeBand} : ${((tableData[key].percentageOfBaseLine) * 100).toFixed(0)}`));
+                        table.appendChild(row);
+                    }
+                }
             }
         </script>
     </head>
-   
-    <body  >
+
+    <body>
         <h1>Welcome to London Underground crowding information!</h1>
         <p>Here you can find crowding information for the London Underground depending on day and time.</p>
         <p>Choose a day and time to see the crowding information.</p>
-        
+
         <form>
             <label for="station">Select Station:</label>
             <select name="station" id="station">
-                <option value="940GZZLUPAC">Paddington</option> 
+                <option value="940GZZLUPAC">Paddington</option>
                 <option value="940GZZLUKSX">King's Cross St Pancras</option>
-                <option value="940GZZLUEUS">Euston</option> 
-                <option value="940GZZLUWLO">Waterloo</option> 
+                <option value="940GZZLUEUS">Euston</option>
+                <option value="940GZZLUWLO">Waterloo</option>
                 <option value="940GZZLULNB">London Bridge</option>
                 <option value="940GZZLULVT">Liverpool</option>
             </select>
         </form>
 
-        <form >
+        <form>
             <label for="day">Select Day:</label>
             <select name="day" id="day">
                 <option value="mon">Monday</option>
@@ -120,23 +130,27 @@
                 <option value="thu">Thursday</option>
                 <option value="fri">Friday</option>
             </select>
-         </form>
-         <form> 
+        </form>
+        <form>
             <button type="button" onclick="getData()">Submit!</button>
-         </form>
-         <div>
+        </form>
+        <div>
             <canvas id="chart"></canvas>
-         </div>
+        </div>
         <div>
             <p id="am_peak"></p>
         </div>
         <div>
             <p id="pm_peak"></p>
         </div>
-        
+        <table id="timeBand_table">
+            
+        </table>
 
-        
-       
-        
+
+
+
+
     </body>
+
 </html>
