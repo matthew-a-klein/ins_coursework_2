@@ -4,15 +4,17 @@
     <head>
         <meta charset="UTF-8">
         <link rel="icon" type="image/svg" href="https://upload.wikimedia.org/wikipedia/commons/4/41/Underground.svg">
-
+        
         <title>London Underground Crowding information</title>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js">
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js">
         </script>
+        <script></script>
         <script>
             let dataChart = null;
+
 
             const xhr = new XMLHttpRequest();
 
@@ -91,6 +93,7 @@
 
             function setTimebandTable(data) {
                 tableData = data.timeBands;
+                $("#timeBand_table tr").remove(); 
                 table=document.getElementById('timeBand_table')
                 for (key in tableData) {
                     if (tableData.hasOwnProperty(key)) {
