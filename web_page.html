@@ -3,15 +3,19 @@
 
     <head>
         <meta charset="UTF-8">
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
         <link rel="icon" type="image/svg" href="https://upload.wikimedia.org/wikipedia/commons/4/41/Underground.svg">
-        
+
         <title>London Underground Crowding information</title>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js">
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js">
         </script>
-        <script></script>
+
         <script>
             let dataChart = null;
 
@@ -93,64 +97,114 @@
 
             function setTimebandTable(data) {
                 tableData = data.timeBands;
-                $("#timeBand_table tr").remove(); 
-                table=document.getElementById('timeBand_table')
+                $("#timeBand_table tr").remove();
+                table = document.getElementById('timeBand_table')
                 for (key in tableData) {
                     if (tableData.hasOwnProperty(key)) {
                         var row = document.createElement('tr');
-                        row.appendChild(document.createElement('td'));
-                        row.appendChild(document.createTextNode(`${tableData[key].timeBand} : ${((tableData[key].percentageOfBaseLine) * 100).toFixed(0)}`));
+                        row.setAttribute('scope', 'row');
+
+                        keyData = document.createElement('td');
+                        timeBandData = document.createElement('td');
+                        percentageData = document.createElement('td');
+
+
+
+                        keyData.appendChild(document.createTextNode(key));
+                        timeBandData.appendChild(document.createTextNode(`${tableData[key].timeBand}`));
+                        percentageData.appendChild(document.createTextNode(`${((tableData[key].percentageOfBaseLine) * 100).toFixed(0)}`));
+
+                        row.appendChild(keyData);
+                        row.appendChild(timeBandData);
+                        row.appendChild(percentageData);
                         table.appendChild(row);
                     }
                 }
             }
         </script>
+        <style>
+            body {
+                background-attachment: fixed;
+                background-position-y: center;
+                background-position-x: 5%;
+                background-repeat: no-repeat;
+                background-size: 15%;
+                background-image: url('https://i.pinimg.com/originals/52/1b/0a/521b0ab43b0243559a39d659d12a40e6.png');
+            }
+        </style>
     </head>
 
     <body>
-        <h1>Welcome to London Underground crowding information!</h1>
-        <p>Here you can find crowding information for the London Underground depending on day and time.</p>
-        <p>Choose a day and time to see the crowding information.</p>
+        <div class='container text-center'>
+            <h1>Welcome to London Underground crowding information!</h1>
+            <p class="text-muted">Here you can find crowding information for the London Underground depending on station
+                and day.</p>
+            <p class="text-muted">Choose a station and day to see the crowding information.</p>
 
-        <form>
-            <label for="station">Select Station:</label>
-            <select name="station" id="station">
-                <option value="940GZZLUPAC">Paddington</option>
-                <option value="940GZZLUKSX">King's Cross St Pancras</option>
-                <option value="940GZZLUEUS">Euston</option>
-                <option value="940GZZLUWLO">Waterloo</option>
-                <option value="940GZZLULNB">London Bridge</option>
-                <option value="940GZZLULVT">Liverpool</option>
-            </select>
-        </form>
+            <form>
+                <label for="station">Select Station:</label>
+                <select name="station" id="station">
+                    <option value="940GZZLUPAC">Paddington</option>
+                    <option value="940GZZLUKSX">King's Cross St Pancras</option>
+                    <option value="940GZZLUEUS">Euston</option>
+                    <option value="940GZZLUWLO">Waterloo</option>
+                    <option value="940GZZLULNB">London Bridge</option>
+                    <option value="940GZZLULVT">Liverpool</option>
+                </select>
+            </form>
 
-        <form>
-            <label for="day">Select Day:</label>
-            <select name="day" id="day">
-                <option value="mon">Monday</option>
-                <option value="tue">Tuesday</option>
-                <option value="wed">Wednesday</option>
-                <option value="thu">Thursday</option>
-                <option value="fri">Friday</option>
-            </select>
-        </form>
-        <form>
-            <button type="button" onclick="getData()">Submit!</button>
-        </form>
-        <div>
-            <canvas id="chart"></canvas>
+            <form>
+                <label for="day">Select Day:</label>
+                <select name="day" id="day">
+                    <option value="mon">Monday</option>
+                    <option value="tue">Tuesday</option>
+                    <option value="wed">Wednesday</option>
+                    <option value="thu">Thursday</option>
+                    <option value="fri">Friday</option>
+                </select>
+            </form>
+            <form>
+                <button type="button" class='btn btn-info' onclick="getData()">Submit!</button>
+            </form>
+            <div>
+                <canvas id="chart"></canvas>
+            </div>
+            <div class="row ">
+                <div class="col-sm-6">
+                    <div class="card border-0">
+                        <div class="card-body" id="am_peak">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card border-0">
+                        <div class="card-body" id="pm_peak">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class='table table-striped table-bordered'>
+                <tr class="thead-dark">
+                    <th scope="col">#</th>
+                    <th scope="col">Timeband</th>
+                    <th scope="col">Percentage Of Base Line</th>
+
+                </tr>
+                <tbody id="timeBand_table">
+
+                </tbody>
+            </table>
         </div>
-        <div>
-            <p id="am_peak"></p>
-        </div>
-        <div>
-            <p id="pm_peak"></p>
-        </div>
-        <table id="timeBand_table">
-            
-        </table>
 
-
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
 
 
 
